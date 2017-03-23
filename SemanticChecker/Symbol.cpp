@@ -14,6 +14,7 @@ Symbol::Symbol() {
     this->value = "";
     this->isFunction = false;
     this->numberOfParams = -1;
+    this->nextSymbol = NULL;
 }
 
 Symbol::Symbol(std::string identifier, std::string scope) {
@@ -23,6 +24,7 @@ Symbol::Symbol(std::string identifier, std::string scope) {
     this->value = "";
     this->isFunction = false;
     this->numberOfParams = -1;
+    this->nextSymbol = NULL;
 }
 
 std::string Symbol::getIdentifier() {
@@ -80,6 +82,20 @@ void Symbol::setNumberOfParams(int number) {
         this->throwFloatException();
     }
     return;
+}
+
+void Symbol::linkNextSymbol(Symbol* nextSym) {
+    if (!this->hasNextSymbol()) {
+        this->nextSymbol = nextSym;
+    }
+    else {
+        this->throwFloatException();
+    }
+    return;
+}
+
+bool Symbol::hasNextSymbol() {
+    return (this->nextSymbol == NULL);
 }
 
 bool Symbol::isEqual(Symbol* sym) {

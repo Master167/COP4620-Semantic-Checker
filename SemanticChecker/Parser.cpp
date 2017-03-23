@@ -79,7 +79,8 @@ bool Parser::acceptToken(std::string token) {
                 Symbol* sym = new Symbol(token, this->currentScope);
                 this->symTab->addSymbol(sym);
                 this->lastSymbol = sym;
-            } 
+            }
+            this->lastId = token;
             result = this->getNextToken();
         }
         else {
@@ -116,7 +117,7 @@ bool Parser::acceptToken(std::string token) {
         findResult = this->currentToken.find(token);
         if (findResult != std::string::npos) {
             //ID: We're not checking if ID has been declared, that's a semantic problem.
-            //ERROR: We're never going to accept a error token. Therefore it never be found in .find()
+            //ERROR: We're never going to accept a error token. Therefore it will never be found in .find()
             //KEYWORD: we need to check the KEYWORD
             //NUM: can be INT or FLOAT and indicates a Number constant
             findResult = this->currentToken.find("KEYWORD: ");
@@ -418,8 +419,12 @@ void Parser::localDeclarationsPrime() {
     if (this->searchArray(3, first, this->currentToken)) {
         this->typeSpecifier();
         this->acceptToken("id");
+        this->lastSymbol->setType(this->lastType);
         this->idSpecifier();
         this->localDeclarationsPrime();
+        this->lastId = "";
+        this->lastType = "";
+        this->lastSymbol = new Symbol();
     }
     else if (this->searchArray(9, follow, this->currentToken)) {
         // Go to empty

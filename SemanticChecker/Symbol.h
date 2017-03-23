@@ -26,6 +26,8 @@ public:
     void setValue(std::string value);
     void changeIsFunction();
     void setNumberOfParams(int number);
+    void linkNextSymbol(Symbol* nextSym);
+    bool hasNextSymbol();
     bool isEqual(Symbol* sym);
 private:
     //Variables
@@ -35,6 +37,7 @@ private:
     std::string value;
     bool isFunction;
     int numberOfParams;
+    Symbol* nextSymbol;
     
     //Functions
     void throwFloatException() throw(float);
