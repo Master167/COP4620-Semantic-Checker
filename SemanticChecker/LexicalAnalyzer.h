@@ -24,7 +24,7 @@ class LexicalAnalyzer {
 public:
     LexicalAnalyzer(std::fstream& inputFile, std::string filename);
     bool isReady();
-    bool scanFile(SymbolTable* symtab);    
+    bool scanFile();    
     std::string outputFilename;
 private:
     // Class Variables

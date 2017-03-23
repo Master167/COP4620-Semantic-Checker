@@ -13,9 +13,11 @@ Parser::Parser(std::fstream& inputFile) : filestream(inputFile) {
 
 bool Parser::parseFile(SymbolTable* symTable) {
     this->symTab = symTable;
+    this->lastSymbol = new Symbol();
     this->currentScope = "";
     this->lastId = "";
     this->functionId = "";
+    this->numberOfParamSeen = -1;
     bool result = true;
     if (this->getNextToken()) {
         try {
@@ -28,6 +30,11 @@ bool Parser::parseFile(SymbolTable* symTable) {
         }
         catch (std::string e) {
             std::cout << e << std::endl;
+            result = false;
+        }
+        catch (float e) {
+            std::cout << "Float Exception thrown" << std::endl;
+            std::cout << "CurrentToken: " << this->currentToken << std::endl;
             result = false;
         }
     }
@@ -69,8 +76,9 @@ bool Parser::acceptToken(std::string token) {
         if (findResult != std::string::npos) {
             // ADD TO SYMBOL TABLE 
             if (this->symTab != NULL) { 
-                Symbol* sym = new Symbol(token, this->currentScope); 
-                this->symTab->addSymbol(sym); 
+                Symbol* sym = new Symbol(token, this->currentScope);
+                this->symTab->addSymbol(sym);
+                this->lastSymbol = sym;
             } 
             result = this->getNextToken();
         }
@@ -214,7 +222,11 @@ void Parser::declaration() {
     if (this->searchArray(3, firstSet, this->currentToken)) {
         this->typeSpecifier();
         this->acceptToken("id");
+        this->lastSymbol->setType(this->lastType);
         this->callDeclaration();
+        this->lastId = "";
+        this->lastType = "";
+        this->lastSymbol = new Symbol();
     }
     else {
         this->throwException();
@@ -228,6 +240,7 @@ void Parser::callDeclaration() {
         this->idSpecifier();
     }
     else if (this->currentToken.compare("(") == 0) {
+        this->lastSymbol->changeIsFunction();
         this->acceptToken("(");
         this->params();
         this->acceptToken(")");
@@ -261,12 +274,15 @@ void Parser::typeSpecifier() {
     std::string third[1] = { "void" };
     if (this->searchArray(1, first, this->currentToken)) {
         this->acceptToken("int");
+        this->lastType = "int";
     }
     else if (this->searchArray(1, second, this->currentToken)) {
         this->acceptToken("float");
+        this->lastType = "float";
     }
     else if (this->searchArray(1, third, this->currentToken)) {
         this->acceptToken("void");
+        this->lastType = "void";
     }
     else {
         this->throwException();
@@ -278,15 +294,18 @@ void Parser::params() {
     std::string first[1] = { "int" };
     std::string second[1] = { "float" };
     std::string third[1] = { "void" };
+    this->numberOfParamSeen = 0;
     if (this->searchArray(1, first, this->currentToken)) {
         this->acceptToken("int");
         this->acceptToken("id");
+        this->numberOfParamSeen++;
         this->array();
         this->paramListPrime();
     }
     else if (this->searchArray(1, second, this->currentToken)) {
         this->acceptToken("float");
         this->acceptToken("id");
+        this->numberOfParamSeen++;
         this->array();
         this->paramListPrime();
     }
@@ -297,6 +316,7 @@ void Parser::params() {
     else {
         this->throwException();
     }
+    this->lastSymbol->setNumberOfParams(this->numberOfParamSeen);
     return;
 }
 
@@ -304,6 +324,7 @@ void Parser::paramList() {
     std::string first[1] = { "id" };
     if (this->searchArray(1, first, this->currentToken)) {
         this->acceptToken("id");
+        this->numberOfParamSeen++;
         this->array();
         this->paramListPrime();
     }

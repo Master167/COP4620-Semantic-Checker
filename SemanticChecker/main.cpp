@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
             SymbolTable* symTab = new SymbolTable(100);
             LexicalAnalyzer* lexy = new LexicalAnalyzer(inputFile, filename);
             if (lexy->isReady()) {
-                continueCompile = lexy->scanFile(symTab);
+                continueCompile = lexy->scanFile();
                 if (continueCompile) {
                     // Transition from input to MY temp file
                     filename.append(".temp"); // .append() adds to the same string in memory and returns a point to that string
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
                     inputFile.flush();
                     inputFile.close();
                     Parser* percy = new Parser(tempFilestream);
-                    continueCompile = percy->parseFile();
+                    continueCompile = percy->parseFile(symTab);
                     delete percy;
                     tempFilestream.flush();
                     tempFilestream.seekg(0, std::ios::beg);

@@ -14,21 +14,30 @@ class Symbol {
 public:
     //Constructor
     Symbol();
-    Symbol(std::string identifier, int depth);
+    Symbol(std::string identifier, std::string scope);
     //Variables
     
     //Functions
     std::string getIdentifier();
-    int getDepth();
+    std::string getDeclaredScope();
+    std::string getType();
+    std::string getValue();
+    void setType(std::string type);
+    void setValue(std::string value);
+    void changeIsFunction();
+    void setNumberOfParams(int number);
     bool isEqual(Symbol* sym);
 private:
     //Variables
     std::string identifier;
-    int depth;
-    //std::string type; // I'll build unto this later
-    //std::string value;
+    std::string declaredScope;
+    std::string type;
+    std::string value;
+    bool isFunction;
+    int numberOfParams;
     
     //Functions
+    void throwFloatException() throw(float);
 };
 
 #endif /* SYMBOL_H */

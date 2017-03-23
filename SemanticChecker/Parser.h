@@ -20,17 +20,20 @@
 class Parser {
 public:
     Parser(std::fstream& inputFile);
-    bool parseFile();
+    bool parseFile(SymbolTable* symTable);
 private:
     // Class Variables
     std::string currentToken;
     std::fstream& filestream;
     
     // Added for Project Three
+    Symbol* lastSymbol;
     SymbolTable* symTab;
     std::string currentScope;
     std::string functionId;
     std::string lastId;
+    std::string lastType;
+    int numberOfParamSeen;
     // Class Methods
     bool getNextToken();
     bool acceptToken(std::string token);
