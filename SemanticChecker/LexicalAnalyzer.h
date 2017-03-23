@@ -33,7 +33,6 @@ private:
     int scope;
     std::fstream& currentFile;
     std::string currentLine;
-    SymbolTable* symTab;
     char* specialCharacters;
     std::string* keywords;
 

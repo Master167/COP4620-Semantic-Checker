@@ -25,6 +25,12 @@ private:
     // Class Variables
     std::string currentToken;
     std::fstream& filestream;
+    
+    // Added for Project Three
+    SymbolTable* symTab;
+    std::string currentScope;
+    std::string functionId;
+    std::string lastId;
     // Class Methods
     bool getNextToken();
     bool acceptToken(std::string token);

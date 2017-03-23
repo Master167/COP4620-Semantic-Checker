@@ -11,7 +11,11 @@
 Parser::Parser(std::fstream& inputFile) : filestream(inputFile) {
 }
 
-bool Parser::parseFile() {
+bool Parser::parseFile(SymbolTable* symTable) {
+    this->symTab = symTable;
+    this->currentScope = "";
+    this->lastId = "";
+    this->functionId = "";
     bool result = true;
     if (this->getNextToken()) {
         try {
@@ -63,6 +67,11 @@ bool Parser::acceptToken(std::string token) {
     if (token.compare("id") == 0) {
         findResult = this->currentToken.find("ID:");
         if (findResult != std::string::npos) {
+            // ADD TO SYMBOL TABLE 
+            if (this->symTab != NULL) { 
+                Symbol* sym = new Symbol(token, this->currentScope); 
+                this->symTab->addSymbol(sym); 
+            } 
             result = this->getNextToken();
         }
         else {

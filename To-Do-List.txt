@@ -1,5 +1,4 @@
 To Do:
-Remove Symbol table from Tokenizer and place into Parser
 Figure out how to capture function scope instead of numeric scope
 Add to Symbols what their scope is, their declared type, and pointer to next item
 Create the symbol table to look like a linked list
