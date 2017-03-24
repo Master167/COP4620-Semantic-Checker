@@ -28,6 +28,7 @@ public:
     void setNumberOfParams(int number);
     void linkNextSymbol(Symbol* nextSym);
     bool hasNextSymbol();
+    Symbol* getNextSymbol();
     bool isEqual(Symbol* sym);
 private:
     //Variables

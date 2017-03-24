@@ -35,6 +35,7 @@ private:
     int HashFunction(std::string str);
     int getNextPrime(int num);
     bool isPrime(int p);
+    void throwFloatException() throw(float);
 };
 
 #endif /* SYMBOLTABLE_H */

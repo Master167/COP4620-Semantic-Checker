@@ -19,13 +19,40 @@ bool SymbolTable::addSymbol(Symbol* sym) {
     int index = this->HashFunction(sym->getIdentifier());
     int collisions = 0;
     bool searching = true;
-    
+    Symbol* currentSymbol;
     while (searching) {
         if (this->table[index].isEqual(this->deadSymbol)) {
             searching = false;
             insertSuccess = true;
             this->table[index] = *sym;
             this->assignedValues++;
+        }
+        else if (this->table[index].getIdentifier().compare(sym->getIdentifier()) == 0) {
+            // Same identifier
+            currentSymbol = &this->table[index];
+            if (currentSymbol->getDeclaredScope().compare(sym->getDeclaredScope()) != 0) {
+                // Not the same scope
+                while (searching) {
+                    if (currentSymbol->getDeclaredScope().compare(sym->getDeclaredScope()) == 0) {
+                        // Same Id and same scope
+                        this->throwFloatException();
+                    }
+                    else if (!currentSymbol->hasNextSymbol()) {
+                        currentSymbol->linkNextSymbol(sym);
+                        searching = false;
+                        insertSuccess = true;
+                    }
+                    else {
+                        currentSymbol = currentSymbol->getNextSymbol();
+                    }
+                }
+            }
+            else {
+                // Same identifier and scope. That's a no
+                searching = false;
+                insertSuccess = false;
+                this->throwFloatException();
+            }
         }
         else if (collisions > 10) {
             index = (index + 1) % this->size;
@@ -78,15 +105,21 @@ bool SymbolTable::isPrime(int p) {
     return true;
 }
 
+void SymbolTable::throwFloatException() throw(float) {
+    throw (float)-1.0;
+    return;
+}
+
 void SymbolTable::printTable() {
     Symbol sym;
     std::cout << " ---Symbol Table--- " << std::endl;
     std::cout << "Identifier | Scope | Location" << std::endl;
-    for (int i = 0; i < this->size; i++) {
-        sym = this->table[i];
-        if (!sym.isEqual(this->deadSymbol)) {
-            std::cout << sym.getIdentifier() << " | " << sym.getDeclaredScope() << " | " << i << std::endl;
-        }
-    }
+    std::cout << "RE-WORK THIS" << std::endl;
+    //for (int i = 0; i < this->size; i++) {
+    //    sym = this->table[i];
+    //    if (!sym.isEqual(this->deadSymbol)) {
+    //        std::cout << sym.getIdentifier() << " | " << sym.getDeclaredScope() << " | " << i << std::endl;
+    //    }
+    //}
     return;
 }

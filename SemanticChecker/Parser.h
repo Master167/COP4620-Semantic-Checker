@@ -28,6 +28,7 @@ private:
     
     // Added for Project Three
     Symbol* lastSymbol;
+    Symbol* functionSymbol;
     SymbolTable* symTab;
     std::string currentScope;
     std::string functionId;
@@ -39,6 +40,7 @@ private:
     bool acceptToken(std::string token);
     void throwBadAcceptToken(std::string badToken, std::string expectedToken) throw(std::string);
     void throwException() throw (int);
+    void throwFloatException() throw(float);
     bool searchArray(int arraySize, std::string *array, std::string key);
     
     // Grammar Methods

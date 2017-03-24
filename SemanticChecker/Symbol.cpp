@@ -98,23 +98,26 @@ bool Symbol::hasNextSymbol() {
     return (this->nextSymbol == NULL);
 }
 
+Symbol* Symbol::getNextSymbol() {
+    if (this->hasNextSymbol()) {
+        return this->nextSymbol;
+    }
+    else {
+        this->throwFloatException();
+        return new Symbol();
+    }
+}
+
 bool Symbol::isEqual(Symbol* sym) {
     bool equal = false;
-    
-    // Check size
-    if (sym->getIdentifier().length() == this->getIdentifier().length() && sym->declaredScope == this->declaredScope) {
+
+    if ((sym->getIdentifier().compare(this->getIdentifier()) == 0) && (sym->getDeclaredScope().compare(this->getDeclaredScope()) == 0)) {
         equal = true;
-        for (int i = 0; i < this->getIdentifier().length(); i++) {
-            if (this->getIdentifier()[i] != sym->getIdentifier()[i]) {
-                equal = false;
-                break;
-            }
-        }
     }
     return equal;
 }
 
 void Symbol::throwFloatException() throw(float) {
-    throw -1.0;
+    throw (float)-1.0;
     return;
 }

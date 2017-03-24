@@ -14,6 +14,7 @@ Parser::Parser(std::fstream& inputFile) : filestream(inputFile) {
 bool Parser::parseFile(SymbolTable* symTable) {
     this->symTab = symTable;
     this->lastSymbol = new Symbol();
+    this->functionSymbol = new Symbol();
     this->currentScope = "";
     this->lastId = "";
     this->functionId = "";
@@ -28,13 +29,13 @@ bool Parser::parseFile(SymbolTable* symTable) {
             std::cout << "CurrentToken: " << this->currentToken << std::endl;
             result = false;
         }
-        catch (std::string e) {
-            std::cout << e << std::endl;
-            result = false;
-        }
         catch (float e) {
             std::cout << "Float Exception thrown" << std::endl;
             std::cout << "CurrentToken: " << this->currentToken << std::endl;
+            result = false;
+        }
+        catch (std::string e) {
+            std::cout << e << std::endl;
             result = false;
         }
     }
@@ -76,7 +77,7 @@ bool Parser::acceptToken(std::string token) {
         if (findResult != std::string::npos) {
             // ADD TO SYMBOL TABLE 
             if (this->symTab != NULL) { 
-                Symbol* sym = new Symbol(token, this->currentScope);
+                Symbol* sym = new Symbol(this->currentToken, this->currentScope);
                 this->symTab->addSymbol(sym);
                 this->lastSymbol = sym;
             }
@@ -151,6 +152,11 @@ void Parser::throwBadAcceptToken(std::string badToken, std::string expectedToken
 
 void Parser::throwException() throw (int) {
     throw -1;
+    return;
+}
+
+void Parser::throwFloatException() throw(float){
+    throw (float)-1.0;
     return;
 }
 
@@ -242,10 +248,14 @@ void Parser::callDeclaration() {
     }
     else if (this->currentToken.compare("(") == 0) {
         this->lastSymbol->changeIsFunction();
+        this->functionSymbol = this->lastSymbol;
+        this->currentScope = this->functionSymbol->getIdentifier();
         this->acceptToken("(");
         this->params();
         this->acceptToken(")");
         this->compountStmt();
+        this->functionSymbol = new Symbol();
+        this->currentScope = "";
     }
     else {
         this->throwException();
@@ -317,7 +327,7 @@ void Parser::params() {
     else {
         this->throwException();
     }
-    this->lastSymbol->setNumberOfParams(this->numberOfParamSeen);
+    this->functionSymbol->setNumberOfParams(this->numberOfParamSeen);
     return;
 }
 
