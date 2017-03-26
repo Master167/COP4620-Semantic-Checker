@@ -37,7 +37,7 @@ private:
     int numberOfParamSeen;
     // Class Methods
     bool getNextToken();
-    bool acceptToken(std::string token);
+    bool acceptToken(std::string token, bool addSymbol);
     void throwBadAcceptToken(std::string badToken, std::string expectedToken) throw(std::string);
     void throwException() throw (int);
     void throwFloatException() throw(float);

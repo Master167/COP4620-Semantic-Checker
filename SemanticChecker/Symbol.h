@@ -22,6 +22,7 @@ public:
     std::string getDeclaredScope();
     std::string getType();
     std::string getValue();
+    bool getIsFunction();
     void setType(std::string type);
     void setValue(std::string value);
     void changeIsFunction();

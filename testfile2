@@ -6,14 +6,14 @@ int gcd (int u, int v)
 	else return gcd(v,u-u / v * v);
 }
 
-void main(void)
-{	int x; int y;
-	x = input(); y = input();
-	output(gcd(x,y));
-}
-
 float add(float x, float y) {
 	x = 1.01;
 	y = 1.01;
 	return x + y;
+}
+
+void main(void)
+{	int x; int y;
+	x = 48; y = 6;
+	add(gcd(x,y), 2);
 }

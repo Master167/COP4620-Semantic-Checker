@@ -2,8 +2,8 @@ To Do:
 (DONE?) Remove Symbol table from Tokenizer and place into Parser
 (DONE?) Figure out how to capture function scope instead of numeric scope
 (DONE?) Add to Symbols what their scope is, their declared type, and pointer to next item
-BLOCK - You cannot add identifiers to the symbol table every time you accept an id. This should only happen when a identifier is being declared or passed as a parameter
-(In-Progress - Clear Block)Create the symbol table to look like a linked list
+CLEARED BLOCK - You cannot add identifiers to the symbol table every time you accept an id. This should only happen when a identifier is being declared or passed as a parameter
+(DONE?)Create the symbol table to look like a linked list
 	-Multiple symbols that have the same name but different scopes should be in the linked list
 Change parser functions to return their type for type checking
 

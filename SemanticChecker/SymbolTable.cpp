@@ -10,7 +10,10 @@
 SymbolTable::SymbolTable(int size) {
     this->deadSymbol = new Symbol();
     this->size = this->getNextPrime(size);
-    this->table = new Symbol[this->size];
+    this->table = new Symbol*[this->size];
+    for (int i = 0; i < this->size; i++) {
+        this->table[i] = new Symbol();
+    }
     this->assignedValues = 0;
 }
 
@@ -20,22 +23,29 @@ bool SymbolTable::addSymbol(Symbol* sym) {
     int collisions = 0;
     bool searching = true;
     Symbol* currentSymbol;
+
     while (searching) {
-        if (this->table[index].isEqual(this->deadSymbol)) {
+        if (this->table[index]->isEqual(this->deadSymbol)) {
             searching = false;
             insertSuccess = true;
-            this->table[index] = *sym;
+            this->table[index] = sym;
             this->assignedValues++;
         }
-        else if (this->table[index].getIdentifier().compare(sym->getIdentifier()) == 0) {
+        else if (this->table[index]->getIdentifier().compare(sym->getIdentifier()) == 0) {
             // Same identifier
-            currentSymbol = &this->table[index];
+            currentSymbol = this->table[index];
             if (currentSymbol->getDeclaredScope().compare(sym->getDeclaredScope()) != 0) {
                 // Not the same scope
                 while (searching) {
                     if (currentSymbol->getDeclaredScope().compare(sym->getDeclaredScope()) == 0) {
                         // Same Id and same scope
-                        this->throwFloatException();
+                        searching = false;
+                        insertSuccess = false;
+                    }
+                    else if (currentSymbol->getIsFunction()) {
+                        // This identifier is a function
+                        searching = false;
+                        insertSuccess = false;
                     }
                     else if (!currentSymbol->hasNextSymbol()) {
                         currentSymbol->linkNextSymbol(sym);
@@ -51,7 +61,6 @@ bool SymbolTable::addSymbol(Symbol* sym) {
                 // Same identifier and scope. That's a no
                 searching = false;
                 insertSuccess = false;
-                this->throwFloatException();
             }
         }
         else if (collisions > 10) {

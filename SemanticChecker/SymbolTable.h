@@ -27,7 +27,7 @@ public:
 //    updateSymbol();
 private:
     // Variables
-    Symbol* table;
+    Symbol** table;
     int size;
     int assignedValues;
 

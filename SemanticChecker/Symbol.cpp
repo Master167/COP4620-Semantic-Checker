@@ -43,6 +43,10 @@ std::string Symbol::getValue() {
     return this->value;
 }
 
+bool Symbol::getIsFunction() {
+    return this->isFunction;
+}
+
 void Symbol::setType(std::string type) {
     if (this->type.compare("") == 0) {
         // Hasn't been set yet
@@ -95,7 +99,7 @@ void Symbol::linkNextSymbol(Symbol* nextSym) {
 }
 
 bool Symbol::hasNextSymbol() {
-    return (this->nextSymbol == NULL);
+    return (this->nextSymbol != NULL);
 }
 
 Symbol* Symbol::getNextSymbol() {

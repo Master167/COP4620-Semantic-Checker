@@ -33,41 +33,6 @@ ID: v
 )
 ;
 }
-KEYWORD: void
-ID: main
-(
-KEYWORD: void
-)
-{
-KEYWORD: int
-ID: x
-;
-KEYWORD: int
-ID: y
-;
-ID: x
-=
-ID: input
-(
-)
-;
-ID: y
-=
-ID: input
-(
-)
-;
-ID: output
-(
-ID: gcd
-(
-ID: x
-,
-ID: y
-)
-)
-;
-}
 KEYWORD: float
 ID: add
 (
@@ -90,5 +55,38 @@ KEYWORD: return
 ID: x
 +
 ID: y
+;
+}
+KEYWORD: void
+ID: main
+(
+KEYWORD: void
+)
+{
+KEYWORD: int
+ID: x
+;
+KEYWORD: int
+ID: y
+;
+ID: x
+=
+INT: 48
+;
+ID: y
+=
+INT: 6
+;
+ID: add
+(
+ID: gcd
+(
+ID: x
+,
+ID: y
+)
+,
+INT: 2
+)
 ;
 }

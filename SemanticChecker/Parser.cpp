@@ -47,9 +47,7 @@ bool Parser::parseFile(SymbolTable* symTable) {
 }
 
 bool Parser::getNextToken() {
-    //if (this->currentLine > 0) {
-    //    std::cout << "Accepted: " << this->currentToken << std::endl;
-    //}
+    //std::cout << "Accepted: " << this->currentToken << std::endl;
     bool result = false;
     std::string temp;
     while (temp.length() <= 0) {
@@ -67,7 +65,7 @@ bool Parser::getNextToken() {
     return result;
 }
 
-bool Parser::acceptToken(std::string token) {
+bool Parser::acceptToken(std::string token, bool addSymbol) {
     bool result = true;
     std::size_t findResult;
     std::string keyword;
@@ -78,7 +76,10 @@ bool Parser::acceptToken(std::string token) {
             // ADD TO SYMBOL TABLE 
             if (this->symTab != NULL) { 
                 Symbol* sym = new Symbol(this->currentToken, this->currentScope);
-                this->symTab->addSymbol(sym);
+                result = this->symTab->addSymbol(sym);
+                if (addSymbol != result) {
+                    this->throwFloatException();
+                }
                 this->lastSymbol = sym;
             }
             this->lastId = token;
@@ -228,7 +229,7 @@ void Parser::declaration() {
     std::string firstSet[3] = { "int", "float", "void" };
     if (this->searchArray(3, firstSet, this->currentToken)) {
         this->typeSpecifier();
-        this->acceptToken("id");
+        this->acceptToken("id", true);
         this->lastSymbol->setType(this->lastType);
         this->callDeclaration();
         this->lastId = "";
@@ -250,9 +251,9 @@ void Parser::callDeclaration() {
         this->lastSymbol->changeIsFunction();
         this->functionSymbol = this->lastSymbol;
         this->currentScope = this->functionSymbol->getIdentifier();
-        this->acceptToken("(");
+        this->acceptToken("(", false);
         this->params();
-        this->acceptToken(")");
+        this->acceptToken(")", false);
         this->compountStmt();
         this->functionSymbol = new Symbol();
         this->currentScope = "";
@@ -265,13 +266,13 @@ void Parser::callDeclaration() {
 
 void Parser::idSpecifier() {
     if (this->currentToken.compare(";") == 0) {
-        this->acceptToken(";");
+        this->acceptToken(";", false);
     }
     else if (this->currentToken.compare("[") == 0) {
-        this->acceptToken("[");
-        this->acceptToken("num");
-        this->acceptToken("]");
-        this->acceptToken(";");
+        this->acceptToken("[", false);
+        this->acceptToken("num", false);
+        this->acceptToken("]", false);
+        this->acceptToken(";", false);
     }
     else {
         this->throwException();
@@ -284,15 +285,15 @@ void Parser::typeSpecifier() {
     std::string second[1] = { "float" };
     std::string third[1] = { "void" };
     if (this->searchArray(1, first, this->currentToken)) {
-        this->acceptToken("int");
+        this->acceptToken("int", false);
         this->lastType = "int";
     }
     else if (this->searchArray(1, second, this->currentToken)) {
-        this->acceptToken("float");
+        this->acceptToken("float", false);
         this->lastType = "float";
     }
     else if (this->searchArray(1, third, this->currentToken)) {
-        this->acceptToken("void");
+        this->acceptToken("void", false);
         this->lastType = "void";
     }
     else {
@@ -307,21 +308,21 @@ void Parser::params() {
     std::string third[1] = { "void" };
     this->numberOfParamSeen = 0;
     if (this->searchArray(1, first, this->currentToken)) {
-        this->acceptToken("int");
-        this->acceptToken("id");
+        this->acceptToken("int", false);
+        this->acceptToken("id", true);
         this->numberOfParamSeen++;
         this->array();
         this->paramListPrime();
     }
     else if (this->searchArray(1, second, this->currentToken)) {
-        this->acceptToken("float");
-        this->acceptToken("id");
+        this->acceptToken("float", false);
+        this->acceptToken("id", true);
         this->numberOfParamSeen++;
         this->array();
         this->paramListPrime();
     }
     else if (this->searchArray(1, third, this->currentToken)) {
-        this->acceptToken("void");
+        this->acceptToken("void", false);
         this->paramList();
     }
     else {
@@ -334,7 +335,7 @@ void Parser::params() {
 void Parser::paramList() {
     std::string first[1] = { "id" };
     if (this->searchArray(1, first, this->currentToken)) {
-        this->acceptToken("id");
+        this->acceptToken("id", true);
         this->numberOfParamSeen++;
         this->array();
         this->paramListPrime();
@@ -351,7 +352,7 @@ void Parser::paramList() {
 
 void Parser::paramListPrime() {
     if (this->currentToken.compare(",") == 0) {
-        this->acceptToken(",");
+        this->acceptToken(",", false);
         this->param();
         this->paramListPrime();
     }
@@ -369,7 +370,7 @@ void Parser::param() {
     std::string first[3] = { "int", "float", "void" };
     if (this->searchArray(3, first, this->currentToken)) {
         this->typeSpecifier();
-        this->acceptToken("id");
+        this->acceptToken("id", true);
         this->array();
     }
     else {
@@ -381,8 +382,8 @@ void Parser::param() {
 void Parser::array() {
     std::string follow[2] = { ",", ")" };
     if (this->currentToken.compare("[") == 0) {
-        this->acceptToken("[");
-        this->acceptToken("]");
+        this->acceptToken("[", false);
+        this->acceptToken("]", false);
     }
     else if (this->searchArray(2, follow, this->currentToken)) {
         // Go to empty
@@ -396,10 +397,10 @@ void Parser::array() {
 
 void Parser::compountStmt() {
     if (this->currentToken.compare("{") == 0) {
-        this->acceptToken("{");
+        this->acceptToken("{", false);
         this->localDeclarations();
         this->statementList();
-        this->acceptToken("}");
+        this->acceptToken("}", false);
     }
     else {
         this->throwException();
@@ -428,7 +429,7 @@ void Parser::localDeclarationsPrime() {
     std::string follow[9] = { "id", "(", "num", ";", "{", "if", "while", "return", "}" };
     if (this->searchArray(3, first, this->currentToken)) {
         this->typeSpecifier();
-        this->acceptToken("id");
+        this->acceptToken("id", true);
         this->lastSymbol->setType(this->lastType);
         this->idSpecifier();
         this->localDeclarationsPrime();
@@ -508,10 +509,10 @@ void Parser::expressionStmt() {
     std::string first[3] = { "id", "(", "num" };
     if (this->searchArray(3, first, this->currentToken)) {
         this->expression();
-        this->acceptToken(";");
+        this->acceptToken(";", false);
     }
     else if (this->currentToken.compare(";") == 0) {
-        this->acceptToken(";");
+        this->acceptToken(";", false);
     }
     else {
         this->throwException();
@@ -522,10 +523,10 @@ void Parser::expressionStmt() {
 void Parser::selectionStmt() {
     std::string first[1] = { "if" };
     if (this->searchArray(1, first, this->currentToken)) {
-        this->acceptToken("if");
-        this->acceptToken("(");
+        this->acceptToken("if", false);
+        this->acceptToken("(", false);
         this->expression();
-        this->acceptToken(")");
+        this->acceptToken(")", false);
         this->statement();
         this->danglingElse();
     }
@@ -539,7 +540,7 @@ void Parser::danglingElse() {
     std::string first[1] = { "else" };
     std::string follow[9] = { "id", "(", "num", ";", "{", "if", "while", "return", "}" };
     if (this->searchArray(1, first, this->currentToken)) {
-        this->acceptToken("else");
+        this->acceptToken("else", false);
         this->statement();
     }
     else if (this->searchArray(9, follow, this->currentToken)) {
@@ -555,10 +556,10 @@ void Parser::danglingElse() {
 void Parser::iterationStmt() {
     std::string first[1] = { "while" };
     if (this->searchArray(1, first, this->currentToken)) {
-        this->acceptToken("while");
-        this->acceptToken("(");
+        this->acceptToken("while", false);
+        this->acceptToken("(", false);
         this->expression();
-        this->acceptToken(")");
+        this->acceptToken(")", false);
         this->statement();
     }
     else {
@@ -570,7 +571,7 @@ void Parser::iterationStmt() {
 void Parser::returnStmt() {
     std::string first[1] = { "return" };
     if (this->searchArray(1, first, this->currentToken)) {
-        this->acceptToken("return");
+        this->acceptToken("return", false);
         this->returnStmtEnd();
     }
     else {
@@ -583,10 +584,10 @@ void Parser::returnStmtEnd() {
     std::string first[3] = { "id", "(", "num" };
     if (this->searchArray(3, first, this->currentToken)) {
         this->expression();
-        this->acceptToken(";");
+        this->acceptToken(";", false);
     }
     else if (this->currentToken.compare(";") == 0) {
-        this->acceptToken(";");
+        this->acceptToken(";", false);
     }
     else {
         this->throwException();
@@ -598,19 +599,19 @@ void Parser::expression() {
     std::string first[1] = { "id" };
     std::string third[1] = { "num" };
     if (this->searchArray(1, first, this->currentToken)) {
-        this->acceptToken("id");
+        this->acceptToken("id", false);
         this->variable();
     }
     else if (this->currentToken.compare("(") == 0) {
-        this->acceptToken("(");
+        this->acceptToken("(", false);
         this->expression();
-        this->acceptToken(")");
+        this->acceptToken(")", false);
         this->termPrime();
         this->additiveExpressionPrime();
         this->relopExpression();
     }
     else if (this->searchArray(1, third, this->currentToken)) {
-        this->acceptToken("num");
+        this->acceptToken("num", false);
         this->termPrime();
         this->additiveExpressionPrime();
         this->relopExpression();
@@ -629,9 +630,9 @@ void Parser::variable() {
         this->variableFactor();
     }
     else if (this->currentToken.compare("(") == 0) {
-        this->acceptToken("(");
+        this->acceptToken("(", false);
         this->args();
-        this->acceptToken(")");
+        this->acceptToken(")", false);
         this->termPrime();
         this->additiveExpressionPrime();
         this->relopExpression();
@@ -650,7 +651,7 @@ void Parser::variableFactor() {
     std::string second[10] = { "*", "/", "+", "-", "<=", "<", ">", ">=", "==", "!=" };
     std::string follow[4] = { ";", ")", "]", "," };
     if (this->currentToken.compare("=") == 0) {
-        this->acceptToken("=");
+        this->acceptToken("=", false);
         this->expression();
     }
     else if (this->searchArray(10, second, this->currentToken)) {
@@ -672,9 +673,9 @@ void Parser::variableFactor() {
 void Parser::varArray() {
     std::string follow[15] = { "=", "*", "/", "+", "-", "<=", "<", ">", ">=", "==", "!=", ";", ")", "]", "," };
     if (this->currentToken.compare("[") == 0) {
-        this->acceptToken("[");
+        this->acceptToken("[", false);
         this->expression();
-        this->acceptToken("]");
+        this->acceptToken("]", false);
     }
     else if (this->searchArray(15, follow, this->currentToken)) {
         // Go to Empty
@@ -705,22 +706,22 @@ void Parser::relopExpression() {
 
 void Parser::relop() {
     if (this->currentToken.compare("<=") == 0) {
-        this->acceptToken("<=");
+        this->acceptToken("<=", false);
     }
     else if (this->currentToken.compare("<") == 0) {
-        this->acceptToken("<");
+        this->acceptToken("<", false);
     }
     else if (this->currentToken.compare(">") == 0) {
-        this->acceptToken(">");
+        this->acceptToken(">", false);
     }
     else if (this->currentToken.compare(">=") == 0) {
-        this->acceptToken(">=");
+        this->acceptToken(">=", false);
     }
     else if (this->currentToken.compare("==") == 0) {
-        this->acceptToken("==");
+        this->acceptToken("==", false);
     }
     else if (this->currentToken.compare("!=") == 0) {
-        this->acceptToken("!=");
+        this->acceptToken("!=", false);
     }
     else {
         this->throwException();
@@ -732,20 +733,20 @@ void Parser::additiveExpression() {
     std::string second[1] = { "id" };
     std::string third[1] = { "num" };
     if (this->currentToken.compare("(") == 0) {
-        this->acceptToken("(");
+        this->acceptToken("(", false);
         this->expression();
-        this->acceptToken(")");
+        this->acceptToken(")", false);
         this->termPrime();
         this->additiveExpressionPrime();
     }
     else if (this->searchArray(1, second, this->currentToken)) {
-        this->acceptToken("id");
+        this->acceptToken("id", false);
         this->varCall();
         this->termPrime();
         this->additiveExpressionPrime();
     }
     else if (this->searchArray(1, third, this->currentToken)) {
-        this->acceptToken("num");
+        this->acceptToken("num", false);
         this->termPrime();
         this->additiveExpressionPrime();
     }
@@ -775,10 +776,10 @@ void Parser::additiveExpressionPrime() {
 
 void Parser::addop() {
     if (this->currentToken.compare("+") == 0) {
-        this->acceptToken("+");
+        this->acceptToken("+", false);
     }
     else if (this->currentToken.compare("-") == 0) {
-        this->acceptToken("-");
+        this->acceptToken("-", false);
     }
     else {
         this->throwException();
@@ -790,18 +791,18 @@ void Parser::term() {
     std::string second[1] = { "id" };
     std::string third[1] = { "num" };
     if (this->currentToken.compare("(") == 0) {
-        this->acceptToken("(");
+        this->acceptToken("(", false);
         this->expression();
-        this->acceptToken(")");
+        this->acceptToken(")", false);
         this->termPrime();
     }
     else if (this->searchArray(1, second, this->currentToken)) {
-        this->acceptToken("id");
+        this->acceptToken("id", false);
         this->varCall();
         this->termPrime();
     }
     else if (this->searchArray(1, third, this->currentToken)) {
-        this->acceptToken("num");
+        this->acceptToken("num", false);
         this->termPrime();
     }
     else {
@@ -832,16 +833,16 @@ void Parser::factor() {
     std::string second[1] = { "id" };
     std::string third[1] = { "num" };
     if (this->currentToken.compare("(") == 0) {
-        this->acceptToken("(");
+        this->acceptToken("(", false);
         this->expression();
-        this->acceptToken(")");
+        this->acceptToken(")", false);
     }
     else if (this->searchArray(1, second, this->currentToken)) {
-        this->acceptToken("id");
+        this->acceptToken("id", false);
         this->varCall();
     }
     else if (this->searchArray(1, third, this->currentToken)) {
-        this->acceptToken("num");
+        this->acceptToken("num", false);
     }
     else {
         this->throwException();
@@ -851,10 +852,10 @@ void Parser::factor() {
 
 void Parser::mulop() {
     if (this->currentToken.compare("*") == 0) {
-        this->acceptToken("*");
+        this->acceptToken("*", false);
     }
     else if (this->currentToken.compare("/") == 0) {
-        this->acceptToken("/");
+        this->acceptToken("/", false);
     }
     else {
         this->throwException();
@@ -865,9 +866,9 @@ void Parser::mulop() {
 void Parser::varCall() {
     std::string follow[14] = { "+", "-", "*", "/", "<=", "<", ">", ">=", "==", "!=", ";", ")", "]", "," };
     if (this->currentToken.compare("(") == 0) {
-        this->acceptToken("(");
+        this->acceptToken("(", false);
         this->args();
-        this->acceptToken(")");
+        this->acceptToken(")", false);
     }
     else if (this->currentToken.compare("[") == 0) {
         this->varArray();
@@ -910,7 +911,7 @@ void Parser::argList() {
 
 void Parser::argListPrime() {
     if (this->currentToken.compare(",") == 0) {
-        this->acceptToken(",");
+        this->acceptToken(",", false);
         this->expression();
         this->argListPrime();
     }
