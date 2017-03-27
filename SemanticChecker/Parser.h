@@ -35,6 +35,8 @@ private:
     std::string lastId;
     std::string lastType;
     int numberOfParamSeen;
+    bool seenMainFunction;
+    bool seenReturnStmt;
     // Class Methods
     bool getNextToken();
     bool acceptToken(std::string token, bool addSymbol);

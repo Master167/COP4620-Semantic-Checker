@@ -8,9 +8,9 @@ CLEARED BLOCK - You cannot add identifiers to the symbol table every time you ac
 (DONE) Change parser functions to return their type for type checking
 
 THEN START SOLVING FOR THESE:
-functions declared int or float  must have a return value of the
+(DONE) functions declared int or float  must have a return value of the
    correct type.
-void functions may or may not have a return, but must not return a
+(DONE) void functions may or may not have a return, but must not return a
    value.
 parameters and arguments agree in number
 parameters and arguments agree in type

@@ -19,6 +19,8 @@ bool Parser::parseFile(SymbolTable* symTable) {
     this->lastId = "";
     this->functionId = "";
     this->numberOfParamSeen = -1;
+    this->seenMainFunction = false;
+    this->seenReturnStmt = false;
     bool result = true;
     if (this->getNextToken()) {
         try {
@@ -223,7 +225,6 @@ void Parser::declarationListPrime() {
     }
     else {
         // Follow set for declaration-list-prime is the end of file and it can go empty
-        return;
     }
     return;
 }
@@ -350,7 +351,6 @@ void Parser::paramList() {
     }
     else if (this->currentToken.compare(")") == 0) {
         // Go to empty
-        return;
     }
     else {
         this->throwException();
@@ -366,7 +366,6 @@ void Parser::paramListPrime() {
     }
     else if (this->currentToken.compare(")") == 0) {
         // Go to empty
-        return;
     }
     else {
         this->throwException();
@@ -396,7 +395,6 @@ void Parser::array() {
     }
     else if (this->searchArray(2, follow, this->currentToken)) {
         // Go to empty
-        return;
     }
     else {
         this->throwException();
@@ -425,7 +423,6 @@ void Parser::localDeclarations() {
     }
     else if (this->searchArray(9, follow, this->currentToken)) {
         // Go to empty
-        return;
     }
     else {
         this->throwException();
@@ -448,7 +445,6 @@ void Parser::localDeclarationsPrime() {
     }
     else if (this->searchArray(9, follow, this->currentToken)) {
         // Go to empty
-        return;
     }
     else {
         this->throwException();
@@ -463,7 +459,6 @@ void Parser::statementList() {
     }
     else if (this->currentToken.compare("}") == 0) {
         // Go to empty
-        return;
     }
     else {
         this->throwException();
@@ -479,7 +474,6 @@ void Parser::statementListPrime() {
     }
     else if (this->currentToken.compare("}") == 0) {
         // Go to empty
-        return;
     }
     else {
         this->throwException();
@@ -556,7 +550,6 @@ void Parser::danglingElse() {
     }
     else if (this->searchArray(9, follow, this->currentToken)) {
         // Go to empty
-        return;
     }
     else {
         this->throwException();
@@ -598,6 +591,20 @@ void Parser::returnStmtEnd() {
     if (this->searchArray(3, first, this->currentToken)) {
         result = this->expression();
         this->acceptToken(";", false);
+        if (this->functionSymbol->getType().compare("void") != 0) {
+            // It's a float or int function
+            if (this->functionSymbol->getType().compare(result) != 0) {
+                // Wrong expression type
+                this->throwFloatException();
+            }
+        }
+        else {
+            // It's a void function
+            if (result.compare("") != 0) {
+                // Returning something on void
+                this->throwFloatException();
+            }
+        }
     }
     else if (this->currentToken.compare(";") == 0) {
         this->acceptToken(";", false);
@@ -609,7 +616,7 @@ void Parser::returnStmtEnd() {
 }
 
 std::string Parser::expression() {
-    std::string result = "";
+    std::string result = this->lastType;
     std::string first[1] = { "id" };
     std::string third[1] = { "num" };
     if (this->searchArray(1, first, this->currentToken)) {
@@ -637,7 +644,7 @@ std::string Parser::expression() {
 }
 
 std::string Parser::variable() {
-    std::string result = "";
+    std::string result = this->lastType;
     std::string first[12] = { "[", "=", "*", "/", "+", "-", "<=", "<", ">", ">=", "==", "!=" };
     std::string follow[4] = { ";", ")", "]", "," };
     if (this->searchArray(12, first, this->currentToken)) {
@@ -664,12 +671,13 @@ std::string Parser::variable() {
 
 std::string Parser::variableFactor() {
     Symbol* assignmentVariable;
-    std::string result = "";
+    std::string result = this->lastType;
     std::string second[10] = { "*", "/", "+", "-", "<=", "<", ">", ">=", "==", "!=" };
     std::string follow[4] = { ";", ")", "]", "," };
     if (this->currentToken.compare("=") == 0) {
         assignmentVariable = this->lastSymbol;
         this->acceptToken("=", false);
+        this->lastType = "";
         result = this->expression();
         // A data type was seen but didn't make it all the way down
         if (result.compare("") == 0 && this->lastType.compare("") != 0) {
@@ -697,7 +705,7 @@ std::string Parser::variableFactor() {
 }
 
 void Parser::varArray() {
-    std::string result = "";
+    std::string result = this->lastType;
     std::string follow[15] = { "=", "*", "/", "+", "-", "<=", "<", ">", ">=", "==", "!=", ";", ")", "]", "," };
     if (this->currentToken.compare("[") == 0) {
         this->acceptToken("[", false);
@@ -706,7 +714,6 @@ void Parser::varArray() {
     }
     else if (this->searchArray(15, follow, this->currentToken)) {
         // Go to Empty
-        return;
     }
     else {
         this->throwException();
@@ -715,7 +722,7 @@ void Parser::varArray() {
 }
 
 std::string Parser::relopExpression() {
-    std::string result = "";
+    std::string result = this->lastType;
     std::string first[6] = { "<=", "<", ">", ">=", "==", "!=" };
     std::string follow[4] = { ";", ")", "]", ",", };
     if (this->searchArray(6, first, this->currentToken)) {
@@ -724,7 +731,6 @@ std::string Parser::relopExpression() {
     }
     else if (this->searchArray(4, follow, this->currentToken)) {
         // Go to empty
-        return result;
     }
     else {
         this->throwException();
@@ -758,7 +764,7 @@ void Parser::relop() {
 }
 
 std::string Parser::additiveExpression() {
-    std::string result = "";
+    std::string result = this->lastType;
     std::string second[1] = { "id" };
     std::string third[1] = { "num" };
     if (this->currentToken.compare("(") == 0) {
@@ -786,7 +792,7 @@ std::string Parser::additiveExpression() {
 }
 
 std::string Parser::additiveExpressionPrime() {
-    std::string result = "";
+    std::string result = this->lastType;
     std::string first[2] = { "+", "-" };
     std::string follow[10] = { "<=", "<", ">", ">=", "==", "!=", ";", ")", "]", "," };
     if (this->searchArray(2, first, this->currentToken)) {
@@ -796,7 +802,6 @@ std::string Parser::additiveExpressionPrime() {
     }
     else if (this->searchArray(10, follow, this->currentToken)) {
         // Go to empty
-        return result;
     }
     else {
         this->throwException();
@@ -818,7 +823,7 @@ void Parser::addop() {
 }
 
 std::string Parser::term() {
-    std::string result = "";
+    std::string result = this->lastType;
     std::string second[1] = { "id" };
     std::string third[1] = { "num" };
     if (this->currentToken.compare("(") == 0) {
@@ -843,7 +848,7 @@ std::string Parser::term() {
 }
 
 std::string Parser::termPrime() {
-    std::string result = "";
+    std::string result = this->lastType;
     std::string first[2] = { "*", "/" };
     std::string follow[12] = { "<=", "<", ">", ">=", "==", "!=", "+", "-", ";", ")", "]", "," };
     if (this->searchArray(2, first, this->currentToken)) {
@@ -853,7 +858,6 @@ std::string Parser::termPrime() {
     }
     else if (this->searchArray(12, follow, this->currentToken)) {
         // Go to Empty
-        return result;
     }
     else {
         this->throwException();
@@ -862,7 +866,7 @@ std::string Parser::termPrime() {
 }
 
 std::string Parser::factor() {
-    std::string result = "";
+    std::string result = this->lastType;
     std::string second[1] = { "id" };
     std::string third[1] = { "num" };
     if (this->currentToken.compare("(") == 0) {
@@ -897,7 +901,7 @@ void Parser::mulop() {
 }
 
 std::string Parser::varCall() {
-    std::string result = "";
+    std::string result = this->lastType;
     std::string follow[14] = { "+", "-", "*", "/", "<=", "<", ">", ">=", "==", "!=", ";", ")", "]", "," };
     if (this->currentToken.compare("(") == 0) {
         this->acceptToken("(", false);
@@ -917,14 +921,13 @@ std::string Parser::varCall() {
 }
 
 std::string Parser::args() {
-    std::string result = "";
+    std::string result = this->lastType;
     std::string first[3] = { "id", "(", "num"};
     if (this->searchArray(3, first, this->currentToken)) {
         result = this->argList();
     }
     else if (this->currentToken.compare(")") == 0) {
         // Go to empty
-        return result;
     }
     else {
         this->throwException();
@@ -933,7 +936,7 @@ std::string Parser::args() {
 }
 
 std::string Parser::argList() {
-    std::string result = "";
+    std::string result = this->lastType;
     std::string first[3] = { "id", "(", "num"};
     if (this->searchArray(3, first, this->currentToken)) {
         result = this->expression();
@@ -946,7 +949,7 @@ std::string Parser::argList() {
 }
 
 std::string Parser::argListPrime() {
-    std::string result = "";
+    std::string result = this->lastType;
     if (this->currentToken.compare(",") == 0) {
         this->acceptToken(",", false);
         result = this->expression();
@@ -954,7 +957,6 @@ std::string Parser::argListPrime() {
     }
     else if (this->currentToken.compare(")") == 0) {
         // Go to empty
-        return result;
     }
     else {
         this->throwException();
