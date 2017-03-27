@@ -20,7 +20,7 @@ public:
     
     // Functions
     void printTable();
-    bool addSymbol(Symbol* sym);
+    Symbol* addSymbol(Symbol* sym);
     Symbol getSymbol(std::string);
     Symbol getDeadSymbol();
 //    removeSymbol(); // To add later

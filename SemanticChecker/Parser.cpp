@@ -69,6 +69,7 @@ bool Parser::acceptToken(std::string token, bool addSymbol) {
     bool result = true;
     std::size_t findResult;
     std::string keyword;
+    Symbol* resultSymbol;
     
     if (token.compare("id") == 0) {
         findResult = this->currentToken.find("ID:");
@@ -76,11 +77,11 @@ bool Parser::acceptToken(std::string token, bool addSymbol) {
             // ADD TO SYMBOL TABLE 
             if (this->symTab != NULL) { 
                 Symbol* sym = new Symbol(this->currentToken, this->currentScope);
-                result = this->symTab->addSymbol(sym);
-                if (addSymbol != result) {
+                resultSymbol = this->symTab->addSymbol(sym);
+                if (addSymbol && (resultSymbol != sym)) {
                     this->throwFloatException();
                 }
-                this->lastSymbol = sym;
+                this->lastSymbol = resultSymbol;
             }
             this->lastId = token;
             result = this->getNextToken();

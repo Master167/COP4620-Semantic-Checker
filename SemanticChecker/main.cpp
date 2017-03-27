@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
             }
             delete lexy;
             delete symTab;
-            //remove(filename.c_str());
+            remove(filename.c_str());
         }
         else {
             std::cout << "Bad Input file" << std::endl;

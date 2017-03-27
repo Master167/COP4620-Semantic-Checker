@@ -17,8 +17,8 @@ SymbolTable::SymbolTable(int size) {
     this->assignedValues = 0;
 }
 
-bool SymbolTable::addSymbol(Symbol* sym) {
-    bool insertSuccess = false;
+Symbol* SymbolTable::addSymbol(Symbol* sym) {
+    Symbol* resultSymbol;
     int index = this->HashFunction(sym->getIdentifier());
     int collisions = 0;
     bool searching = true;
@@ -27,7 +27,7 @@ bool SymbolTable::addSymbol(Symbol* sym) {
     while (searching) {
         if (this->table[index]->isEqual(this->deadSymbol)) {
             searching = false;
-            insertSuccess = true;
+            resultSymbol = sym;
             this->table[index] = sym;
             this->assignedValues++;
         }
@@ -40,17 +40,17 @@ bool SymbolTable::addSymbol(Symbol* sym) {
                     if (currentSymbol->getDeclaredScope().compare(sym->getDeclaredScope()) == 0) {
                         // Same Id and same scope
                         searching = false;
-                        insertSuccess = false;
+                        resultSymbol = currentSymbol;
                     }
                     else if (currentSymbol->getIsFunction()) {
                         // This identifier is a function
                         searching = false;
-                        insertSuccess = false;
+                        resultSymbol = currentSymbol;
                     }
                     else if (!currentSymbol->hasNextSymbol()) {
                         currentSymbol->linkNextSymbol(sym);
                         searching = false;
-                        insertSuccess = true;
+                        resultSymbol = sym;
                     }
                     else {
                         currentSymbol = currentSymbol->getNextSymbol();
@@ -60,7 +60,7 @@ bool SymbolTable::addSymbol(Symbol* sym) {
             else {
                 // Same identifier and scope. That's a no
                 searching = false;
-                insertSuccess = false;
+                resultSymbol = currentSymbol;
             }
         }
         else if (collisions > 10) {
@@ -68,7 +68,7 @@ bool SymbolTable::addSymbol(Symbol* sym) {
         }
         else if (collisions == this->size) {
             // Something done broke
-            searching = false;
+            this->throwFloatException();
         }
         else {
             collisions++;
@@ -76,7 +76,7 @@ bool SymbolTable::addSymbol(Symbol* sym) {
         }
     }
         
-    return insertSuccess;
+    return resultSymbol;
 }
 
 Symbol SymbolTable::getSymbol(std::string) {
