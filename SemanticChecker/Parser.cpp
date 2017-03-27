@@ -88,6 +88,9 @@ bool Parser::acceptToken(std::string token, bool addSymbol) {
                     this->throwFloatException();
                 }
                 this->lastSymbol = resultSymbol;
+                if (this->lastSymbol->getType().compare("") != 0) {
+                    this->lastType = this->lastSymbol->getType();
+                }
             }
             this->lastId = token;
             result = this->getNextToken();
@@ -723,6 +726,10 @@ void Parser::varArray() {
     if (this->currentToken.compare("[") == 0) {
         this->acceptToken("[", false);
         result = this->expression();
+        // Check if result is an INT
+        if (result.compare("int") != 0) {
+            this->throwFloatException();
+        }
         this->acceptToken("]", false);
     }
     else if (this->searchArray(15, follow, this->currentToken)) {
