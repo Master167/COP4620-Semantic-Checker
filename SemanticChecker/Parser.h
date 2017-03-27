@@ -74,13 +74,13 @@ private:
     std::string variable();
     std::string variableFactor();
     void varArray();
-    std::string relopExpression();
+    std::string relopExpression(std::string leftType);
     void relop();
     std::string additiveExpression();
-    std::string additiveExpressionPrime();
+    std::string additiveExpressionPrime(std::string leftType);
     void addop();
     std::string term();
-    std::string termPrime();
+    std::string termPrime(std::string leftType);
     std::string factor();
     void mulop();
     std::string varCall();

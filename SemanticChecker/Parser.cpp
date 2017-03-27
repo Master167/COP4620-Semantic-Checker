@@ -645,15 +645,15 @@ std::string Parser::expression() {
         this->acceptToken("(", false);
         result = this->expression();
         this->acceptToken(")", false);
-        result = this->termPrime();
-        result = this->additiveExpressionPrime();
-        result = this->relopExpression();
+        result = this->termPrime(result);
+        result = this->additiveExpressionPrime(result);
+        result = this->relopExpression(result);
     }
     else if (this->searchArray(1, third, this->currentToken)) {
         this->acceptToken("num", false);
-        result = this->termPrime();
-        result = this->additiveExpressionPrime();
-        result = this->relopExpression();
+        result = this->termPrime(this->lastType);
+        result = this->additiveExpressionPrime(result);
+        result = this->relopExpression(result);
     }
     else {
         this->throwException();
@@ -673,9 +673,9 @@ std::string Parser::variable() {
         this->acceptToken("(", false);
         result = this->args();
         this->acceptToken(")", false);
-        result = this->termPrime();
-        result = this->additiveExpressionPrime();
-        result = this->relopExpression();
+        result = this->termPrime(result);
+        result = this->additiveExpressionPrime(result);
+        result = this->relopExpression(result);
     }
     else if (this->searchArray(4, follow, this->currentToken)) {
         this->varArray();
@@ -707,14 +707,14 @@ std::string Parser::variableFactor() {
         }
     }
     else if (this->searchArray(10, second, this->currentToken)) {
-        result = this->termPrime();
-        result = this->additiveExpressionPrime();
-        result = this->relopExpression();
+        result = this->termPrime(result);
+        result = this->additiveExpressionPrime(result);
+        result = this->relopExpression(result);
     }
     else if (this->searchArray(4, follow, this->currentToken)) {
-        result = this->termPrime();
-        result = this->additiveExpressionPrime();
-        result = this->relopExpression();
+        result = this->termPrime(result);
+        result = this->additiveExpressionPrime(result);
+        result = this->relopExpression(result);
     }
     else {
         this->throwException();
@@ -747,13 +747,16 @@ void Parser::varArray() {
     return;
 }
 
-std::string Parser::relopExpression() {
-    std::string result = this->lastType;
+std::string Parser::relopExpression(std::string leftType) {
+    std::string result = leftType;
     std::string first[6] = { "<=", "<", ">", ">=", "==", "!=" };
     std::string follow[4] = { ";", ")", "]", ",", };
     if (this->searchArray(6, first, this->currentToken)) {
         this->relop();
         result = this->additiveExpression();
+        if (leftType.compare(result) != 0) {
+            this->throwFloatException();
+        }
     }
     else if (this->searchArray(4, follow, this->currentToken)) {
         // Go to empty
@@ -797,19 +800,19 @@ std::string Parser::additiveExpression() {
         this->acceptToken("(", false);
         result = this->expression();
         this->acceptToken(")", false);
-        result = this->termPrime();
-        result = this->additiveExpressionPrime();
+        result = this->termPrime(result);
+        result = this->additiveExpressionPrime(result);
     }
     else if (this->searchArray(1, second, this->currentToken)) {
         this->acceptToken("id", false);
         result = this->varCall();
-        result = this->termPrime();
-        result = this->additiveExpressionPrime();
+        result = this->termPrime(result);
+        result = this->additiveExpressionPrime(result);
     }
     else if (this->searchArray(1, third, this->currentToken)) {
         this->acceptToken("num", false);
-        result = this->termPrime();
-        result = this->additiveExpressionPrime();
+        result = this->termPrime(this->lastType);
+        result = this->additiveExpressionPrime(result);
     }
     else {
         this->throwException();
@@ -817,14 +820,17 @@ std::string Parser::additiveExpression() {
     return result;
 }
 
-std::string Parser::additiveExpressionPrime() {
-    std::string result = this->lastType;
+std::string Parser::additiveExpressionPrime(std::string leftType) {
+    std::string result = leftType;
     std::string first[2] = { "+", "-" };
     std::string follow[10] = { "<=", "<", ">", ">=", "==", "!=", ";", ")", "]", "," };
     if (this->searchArray(2, first, this->currentToken)) {
         this->addop();
         result = this->term();
-        result = this->additiveExpressionPrime();
+        if (leftType.compare(result) != 0) {
+            this->throwFloatException();
+        }
+        result = this->additiveExpressionPrime(result);
     }
     else if (this->searchArray(10, follow, this->currentToken)) {
         // Go to empty
@@ -856,16 +862,16 @@ std::string Parser::term() {
         this->acceptToken("(", false);
         result = this->expression();
         this->acceptToken(")", false);
-        result = this->termPrime();
+        result = this->termPrime(result);
     }
     else if (this->searchArray(1, second, this->currentToken)) {
         this->acceptToken("id", false);
         result = this->varCall();
-        result = this->termPrime();
+        result = this->termPrime(result);
     }
     else if (this->searchArray(1, third, this->currentToken)) {
         this->acceptToken("num", false);
-        result = this->termPrime();
+        result = this->termPrime(this->lastType);
     }
     else {
         this->throwException();
@@ -873,14 +879,18 @@ std::string Parser::term() {
     return result;
 }
 
-std::string Parser::termPrime() {
-    std::string result = this->lastType;
+std::string Parser::termPrime(std::string leftType) {
+    std::string result = leftType;
     std::string first[2] = { "*", "/" };
     std::string follow[12] = { "<=", "<", ">", ">=", "==", "!=", "+", "-", ";", ")", "]", "," };
     if (this->searchArray(2, first, this->currentToken)) {
         this->mulop();
         result = this->factor();
-        result = this->termPrime();
+        if (leftType.compare(result) != 0) {
+            // Operands don't match
+            this->throwFloatException();
+        }
+        result = this->termPrime(result);
     }
     else if (this->searchArray(12, follow, this->currentToken)) {
         // Go to Empty

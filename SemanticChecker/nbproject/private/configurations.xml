@@ -28,6 +28,7 @@
         <runcommandpicklist>
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" testfile1</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" testfile3</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" testfile2</runcommandpicklistitem>
         </runcommandpicklist>
         <runcommand>"${OUTPUT_PATH}" testfile2</runcommand>
