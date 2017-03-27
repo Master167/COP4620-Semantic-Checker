@@ -21,7 +21,7 @@ public:
     // Functions
     void printTable();
     Symbol* addSymbol(Symbol* sym);
-    Symbol getSymbol(std::string);
+    Symbol* getSymbol(std::string id, std::string scope);
     Symbol getDeadSymbol();
 //    removeSymbol(); // To add later
 //    updateSymbol();

@@ -79,8 +79,8 @@ Symbol* SymbolTable::addSymbol(Symbol* sym) {
     return resultSymbol;
 }
 
-Symbol SymbolTable::getSymbol(std::string) {
-    return *this->deadSymbol;
+Symbol* SymbolTable::getSymbol(std::string id, std::string scope) {
+    return this->deadSymbol;
 }
 
 Symbol SymbolTable::getDeadSymbol() {
