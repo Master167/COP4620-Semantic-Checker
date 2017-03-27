@@ -25,6 +25,10 @@ bool Parser::parseFile(SymbolTable* symTable) {
     if (this->getNextToken()) {
         try {
             this->program();
+            if (!this->seenMainFunction) {
+                // I have not seen a main function
+                result = false;
+            }
         }
         catch (int e) {
             std::cout << "Int Exception thrown" << std::endl;
@@ -252,13 +256,21 @@ void Parser::callDeclaration() {
         this->idSpecifier();
     }
     else if (this->currentToken.compare("(") == 0) {
+        if (this->lastSymbol->getIdentifier().compare("ID: main") == 0) {
+            this->seenMainFunction = true;
+        }
         this->lastSymbol->changeIsFunction();
         this->functionSymbol = this->lastSymbol;
+        this->seenReturnStmt = false;
         this->currentScope = this->functionSymbol->getIdentifier();
         this->acceptToken("(", false);
         this->params();
         this->acceptToken(")", false);
         this->compountStmt();
+        // The function is a non-void type and no returnStmt was seen
+        if (this->functionSymbol->getType().compare("void") != 0 && !this->seenReturnStmt) {
+            this->throwFloatException();
+        }
         this->functionSymbol = new Symbol();
         this->currentScope = "";
     }
@@ -577,6 +589,7 @@ void Parser::returnStmt() {
     std::string first[1] = { "return" };
     if (this->searchArray(1, first, this->currentToken)) {
         this->acceptToken("return", false);
+        this->seenReturnStmt = true;
         this->returnStmtEnd();
     }
     else {

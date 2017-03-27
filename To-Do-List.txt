@@ -17,10 +17,10 @@ parameters and arguments agree in type
 operand agreement
 operand/operator agreement
 array index agreement
-variable declaration (all variables must be declared ... scope)
-variable declaration (all variables declared once ... scope)
-void functions cannot have a return value
-each program must have one main function
+(DONE) variable declaration (all variables must be declared ... scope)
+(KINDA) variable declaration (all variables declared once ... scope)
+(DONE) void functions cannot have a return value
+(DONE) each program must have one main function
 return only simple structures
 id's should not be type void
 each function should be defined (actually a linker error)
