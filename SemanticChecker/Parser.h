@@ -68,23 +68,23 @@ private:
     void iterationStmt();
     void returnStmt();
     void returnStmtEnd();
-    void expression();
-    void variable();
-    void variableFactor();
+    std::string expression();
+    std::string variable();
+    std::string variableFactor();
     void varArray();
-    void relopExpression();
+    std::string relopExpression();
     void relop();
-    void additiveExpression();
-    void additiveExpressionPrime();
+    std::string additiveExpression();
+    std::string additiveExpressionPrime();
     void addop();
-    void term();
-    void termPrime();
-    void factor();
+    std::string term();
+    std::string termPrime();
+    std::string factor();
     void mulop();
-    void varCall();
-    void args();
-    void argList();
-    void argListPrime();
+    std::string varCall();
+    std::string args();
+    std::string argList();
+    std::string argListPrime();
 };
 
 #endif /* PARSER_H */

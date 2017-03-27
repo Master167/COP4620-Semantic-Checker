@@ -5,7 +5,7 @@ To Do:
 CLEARED BLOCK - You cannot add identifiers to the symbol table every time you accept an id. This should only happen when a identifier is being declared or passed as a parameter
 (DONE?)Create the symbol table to look like a linked list
 	-Multiple symbols that have the same name but different scopes should be in the linked list
-Change parser functions to return their type for type checking
+(DONE) Change parser functions to return their type for type checking
 
 THEN START SOLVING FOR THESE:
 functions declared int or float  must have a return value of the
