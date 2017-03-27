@@ -23,9 +23,11 @@ public:
     std::string getType();
     std::string getValue();
     bool getIsFunction();
+    bool getIsArray();
     void setType(std::string type);
     void setValue(std::string value);
     void changeIsFunction();
+    void changeIsArray();
     void setNumberOfParams(int number);
     void linkNextSymbol(Symbol* nextSym);
     bool hasNextSymbol();
@@ -38,6 +40,7 @@ private:
     std::string type;
     std::string value;
     bool isFunction;
+    bool isArray;
     int numberOfParams;
     Symbol* nextSymbol;
     

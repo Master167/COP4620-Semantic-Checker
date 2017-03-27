@@ -13,6 +13,7 @@ Symbol::Symbol() {
     this->type = "";
     this->value = "";
     this->isFunction = false;
+    this->isArray = false;
     this->numberOfParams = -1;
     this->nextSymbol = NULL;
 }
@@ -23,6 +24,7 @@ Symbol::Symbol(std::string identifier, std::string scope) {
     this->type = "";
     this->value = "";
     this->isFunction = false;
+    this->isArray = false;
     this->numberOfParams = -1;
     this->nextSymbol = NULL;
 }
@@ -45,6 +47,10 @@ std::string Symbol::getValue() {
 
 bool Symbol::getIsFunction() {
     return this->isFunction;
+}
+
+bool Symbol::getIsArray() {
+    return this->isArray;
 }
 
 void Symbol::setType(std::string type) {
@@ -71,6 +77,16 @@ void Symbol::setValue(std::string value) {
 void Symbol::changeIsFunction() {
     if (!this->isFunction && this->identifier.compare("$DEAD$") != 0) {
         this->isFunction = true;
+    }
+    else {
+        this->throwFloatException();
+    }
+    return;
+}
+
+void Symbol::changeIsArray() {
+    if (!this->isArray && this->identifier.compare("$DEAD$") != 0) {
+        this->isArray = true;
     }
     else {
         this->throwFloatException();

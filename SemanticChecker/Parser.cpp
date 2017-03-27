@@ -291,6 +291,7 @@ void Parser::idSpecifier() {
         this->acceptToken("[", false);
         this->acceptToken("num", false);
         this->acceptToken("]", false);
+        this->lastSymbol->changeIsArray();
         this->acceptToken(";", false);
     }
     else {
@@ -407,6 +408,7 @@ void Parser::array() {
     if (this->currentToken.compare("[") == 0) {
         this->acceptToken("[", false);
         this->acceptToken("]", false);
+        this->lastSymbol->changeIsArray();
     }
     else if (this->searchArray(2, follow, this->currentToken)) {
         // Go to empty
@@ -724,6 +726,10 @@ void Parser::varArray() {
     std::string result = this->lastType;
     std::string follow[15] = { "=", "*", "/", "+", "-", "<=", "<", ">", ">=", "==", "!=", ";", ")", "]", "," };
     if (this->currentToken.compare("[") == 0) {
+        // The lastSymbol seen is not an array
+        if (!this->lastSymbol->getIsArray()) {
+            this->throwFloatException();
+        }
         this->acceptToken("[", false);
         result = this->expression();
         // Check if result is an INT
