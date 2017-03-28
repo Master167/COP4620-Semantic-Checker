@@ -64,6 +64,7 @@ Symbol* SymbolTable::addSymbol(Symbol* sym) {
             }
         }
         else if (collisions > 10) {
+            collisions++;
             index = (index + 1) % this->size;
         }
         else if (collisions == this->size) {
@@ -80,7 +81,59 @@ Symbol* SymbolTable::addSymbol(Symbol* sym) {
 }
 
 Symbol* SymbolTable::getSymbol(std::string id, std::string scope) {
-    return this->deadSymbol;
+    Symbol* resultSymbol = new Symbol();
+    Symbol* currentSymbol;
+    int index = this->HashFunction(id);
+    int collisions = 0;
+    bool searching = true;
+    
+    while (searching) {
+        currentSymbol = this->table[index];
+        if (currentSymbol->getIdentifier().compare(id) == 0) {
+            // Same identifier. Check if scope is find if scope is same then check if global stop when no more symbols exist in list
+            while (searching) {
+                if (currentSymbol->getDeclaredScope().compare(scope) == 0) {
+                    searching = false;
+                    resultSymbol = currentSymbol;
+                }
+                else if (currentSymbol->getDeclaredScope().compare("") == 0) {
+                    resultSymbol = currentSymbol;
+                    if (currentSymbol->hasNextSymbol()) {
+                        currentSymbol = currentSymbol->getNextSymbol();
+                    }
+                    else {
+                        searching = false;
+                    }
+                }
+                else if (currentSymbol->hasNextSymbol()) {
+                    currentSymbol = currentSymbol->getNextSymbol();
+                }
+                else {
+                    searching = false;
+                }
+            }
+        }
+        else if (currentSymbol->getIdentifier().compare(this->deadSymbol->getIdentifier()) == 0) {
+            // id does not exist in table
+            searching = false;
+        }
+        else if (collisions == this->size) {
+            // Something done broke
+            searching = false;
+        }
+        else if (collisions > 10) {
+            // Not the same identifier, move index and increment collisions
+            collisions++;
+            index = (index + 1) % this->size;
+        }
+        else {
+            // Not the same identifier, move index and increment collisions
+            collisions++;
+            index = ((index * index) * collisions) % this->size;
+        }
+    }
+    
+    return resultSymbol;
 }
 
 Symbol SymbolTable::getDeadSymbol() {
