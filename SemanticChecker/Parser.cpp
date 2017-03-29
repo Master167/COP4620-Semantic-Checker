@@ -688,6 +688,10 @@ std::string Parser::variable() {
         result = this->variableFactor();
     }
     else if (this->currentToken.compare("(") == 0) {
+        if (!this->lastSymbol->getIsFunction()) {
+            // lastSymbol seen is not a function
+            this->throwFloatException();
+        }
         this->acceptToken("(", false);
         result = this->args();
         this->acceptToken(")", false);
