@@ -265,6 +265,10 @@ void Parser::callDeclaration() {
     std::string idFirst[2] = { ";", "[" };
     if (this->searchArray(2, idFirst, this->currentToken)) {
         this->idSpecifier();
+        if (this->lastSymbol->getType().compare("void") == 0) {
+            // An id of type void
+            this->throwFloatException();
+        }
     }
     else if (this->currentToken.compare("(") == 0) {
         this->lastSymbol->changeIsFunction();
@@ -615,6 +619,8 @@ void Parser::returnStmtEnd() {
     std::string result = "";
     std::string first[3] = { "id", "(", "num" };
     if (this->searchArray(3, first, this->currentToken)) {
+        // Clear lastSymbol for array check
+        this->lastSymbol = new Symbol();
         result = this->expression();
         this->acceptToken(";", false);
         if (this->functionSymbol->getType().compare("void") != 0) {
@@ -630,6 +636,10 @@ void Parser::returnStmtEnd() {
                 // Returning something on void
                 this->throwFloatException();
             }
+        }
+        if (this->lastSymbol->getIsArray()) {
+            // Array in return expression
+            this->throwFloatException();
         }
     }
     else if (this->currentToken.compare(";") == 0) {

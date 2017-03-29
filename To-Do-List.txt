@@ -21,6 +21,6 @@ array index agreement
 (KINDA) variable declaration (all variables declared once ... scope)
 (DONE) void functions cannot have a return value
 (DONE) each program must have one main function
-return only simple structures
-id's should not be type void
+(done?) return only simple structures
+(DONE) id's should not be type void
 each function should be defined (actually a linker error)
