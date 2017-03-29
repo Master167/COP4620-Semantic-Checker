@@ -30,17 +30,17 @@ bool Parser::parseFile(SymbolTable* symTable) {
             }
         }
         catch (int e) {
-            std::cout << "Int Exception thrown" << std::endl;
-            std::cout << "CurrentToken: " << this->currentToken << std::endl;
+            //std::cout << "Int Exception thrown" << std::endl;
+            //std::cout << "CurrentToken: " << this->currentToken << std::endl;
             result = false;
         }
         catch (float e) {
-            std::cout << "Float Exception thrown" << std::endl;
-            std::cout << "CurrentToken: " << this->currentToken << std::endl;
+            //std::cout << "Float Exception thrown" << std::endl;
+            //std::cout << "CurrentToken: " << this->currentToken << std::endl;
             result = false;
         }
         catch (std::string e) {
-            std::cout << e << std::endl;
+            //std::cout << e << std::endl;
             result = false;
         }
     }
@@ -52,7 +52,7 @@ bool Parser::parseFile(SymbolTable* symTable) {
 }
 
 bool Parser::getNextToken() {
-    std::cout << "Accepted: " << this->currentToken << std::endl;
+    //std::cout << "Accepted: " << this->currentToken << std::endl;
     bool result = false;
     std::string temp;
     while (temp.length() <= 0) {
