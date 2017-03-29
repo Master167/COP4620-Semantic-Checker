@@ -19,14 +19,13 @@ bool Parser::parseFile(SymbolTable* symTable) {
     this->lastId = "";
     this->functionId = "";
     this->numberOfParamSeen = -1;
-    this->seenMainFunction = false;
     this->seenReturnStmt = false;
     bool result = true;
     if (this->getNextToken()) {
         try {
             this->program();
-            if (!this->seenMainFunction) {
-                // I have not seen a main function
+            if (this->functionSymbol->getIdentifier().compare("ID: main") != 0) {
+                // last function seen was not main
                 result = false;
             }
         }
@@ -92,10 +91,14 @@ bool Parser::acceptToken(std::string token, bool addSymbol) {
                 else {
                     resultSymbol = this->symTab->getSymbol(this->currentToken, this->currentScope);
                 }
-                this->lastSymbol = resultSymbol;
-                if (this->lastSymbol->getType().compare("") != 0) {
-                    this->lastType = this->lastSymbol->getType();
+                if (resultSymbol->getIdentifier().compare("$DEAD$") == 0) {
+                    this->throwFloatException();
                 }
+                else if (resultSymbol->getType().compare("") != 0) {
+                    this->lastType = resultSymbol->getType();
+                }
+                this->lastSymbol = resultSymbol;
+                
             }
             this->lastId = token;
             result = this->getNextToken();
@@ -264,9 +267,6 @@ void Parser::callDeclaration() {
         this->idSpecifier();
     }
     else if (this->currentToken.compare("(") == 0) {
-        if (this->lastSymbol->getIdentifier().compare("ID: main") == 0) {
-            this->seenMainFunction = true;
-        }
         this->lastSymbol->changeIsFunction();
         this->functionSymbol = this->lastSymbol;
         this->seenReturnStmt = false;
@@ -279,7 +279,9 @@ void Parser::callDeclaration() {
         if (this->functionSymbol->getType().compare("void") != 0 && !this->seenReturnStmt) {
             this->throwFloatException();
         }
-        this->functionSymbol = new Symbol();
+        if (this->functionSymbol->getIdentifier().compare("ID: main") != 0) {
+            this->functionSymbol = new Symbol();
+        }
         this->currentScope = "";
     }
     else {
@@ -400,6 +402,7 @@ void Parser::param() {
         this->typeSpecifier();
         this->acceptToken("id", true);
         this->lastSymbol->setType(this->lastType);
+        this->numberOfParamSeen++;
         this->array();
     }
     else {
@@ -962,10 +965,22 @@ std::string Parser::varCall() {
 }
 
 std::string Parser::args() {
+    Symbol* functionSymbol;
     std::string result = this->lastType;
     std::string first[3] = { "id", "(", "num"};
     if (this->searchArray(3, first, this->currentToken)) {
+        functionSymbol = this->symTab->getSymbol(this->lastSymbol->getIdentifier(), "");
+        if (functionSymbol->getIdentifier().compare("$DEAD$") == 0) {
+            // Function wasn't defined yet
+            this->throwFloatException();
+        }
+        this->numberOfParamSeen = 0;
         result = this->argList();
+        if (functionSymbol->getNumberOfParams() != this->numberOfParamSeen) {
+            // Number of args doesn't equal defined number
+            this->throwFloatException();
+        }
+        this->numberOfParamSeen = 0;
     }
     else if (this->currentToken.compare(")") == 0) {
         // Go to empty
@@ -981,6 +996,7 @@ std::string Parser::argList() {
     std::string first[3] = { "id", "(", "num"};
     if (this->searchArray(3, first, this->currentToken)) {
         result = this->expression();
+        this->numberOfParamSeen++;
         result = this->argListPrime();
     }
     else {
@@ -994,6 +1010,7 @@ std::string Parser::argListPrime() {
     if (this->currentToken.compare(",") == 0) {
         this->acceptToken(",", false);
         result = this->expression();
+        this->numberOfParamSeen++;
         result = this->argListPrime();
     }
     else if (this->currentToken.compare(")") == 0) {

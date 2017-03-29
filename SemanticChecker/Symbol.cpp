@@ -104,6 +104,16 @@ void Symbol::setNumberOfParams(int number) {
     return;
 }
 
+int Symbol::getNumberOfParams() {
+    if (this->isFunction) {
+        return this->numberOfParams;
+    }
+    else {
+        this->throwFloatException();
+    }
+    return 0;
+}
+
 void Symbol::linkNextSymbol(Symbol* nextSym) {
     if (!this->hasNextSymbol()) {
         this->nextSymbol = nextSym;

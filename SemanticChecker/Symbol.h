@@ -29,6 +29,7 @@ public:
     void changeIsFunction();
     void changeIsArray();
     void setNumberOfParams(int number);
+    int getNumberOfParams();
     void linkNextSymbol(Symbol* nextSym);
     bool hasNextSymbol();
     Symbol* getNextSymbol();
